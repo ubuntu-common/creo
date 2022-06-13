@@ -1,0 +1,45 @@
+mainmenu "Ubuntu Common"
+
+choice
+	prompt "Target architecture"
+
+config ARCH_CHOICE_1
+	bool
+	prompt "amd64"
+
+config ARCH_CHOICE_2
+	bool
+	prompt "i386"
+
+endchoice
+
+choice
+	prompt "Target suite"
+
+config SUITE_CHOICE_1
+	bool
+	prompt "focal"
+
+config SUITE_CHOICE_2
+	bool
+	prompt "impish"
+
+endchoice
+
+config ARCH
+	string
+	default "amd64" if ARCH_CHOICE_1
+	default "i386" if ARCH_CHOICE_2
+
+config VARIANT
+	string
+	default "minbase"
+
+config SUITE
+	string
+	default "focal" if SUITE_CHOICE_1
+	default "impish" if SUITE_CHOICE_2
+
+config SOURCE
+	string "Target source"
+	default "http://us.archive.ubuntu.com/ubuntu/"

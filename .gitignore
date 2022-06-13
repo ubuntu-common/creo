@@ -1,1 +1,4 @@
-creo/build_dir
+creo/staging_dir
+creo/.config
+creo/.config.old
+creo/tmp

@@ -1,4 +1,0 @@
-#!/bin/bash
-
-export HOME=/root
-export LC_ALL=C
