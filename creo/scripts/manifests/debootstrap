@@ -1,0 +1,5 @@
+[arch]
+debootstrap
+
+[ubuntu]
+debootstrap
