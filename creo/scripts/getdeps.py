@@ -7,7 +7,7 @@ import os
 
 from getdeps.manifest import ManifestContext
 from getdeps.platform import get_linux_type
-from getdeps.handler import ArgumentHandler, HDLR_OK
+from getdeps.handler import ArgumentHandler, HDLR_OK, HDLR_ERR
 from getdeps.installer import Installer
 
 """
@@ -15,53 +15,28 @@ from getdeps.installer import Installer
 """
 MANIFESTS_DIRECTORY = "manifests"
 
-"""
-	Be careful, the $id$ key will be replaced with your distribution ID during the parsing process!
-"""
-ALLOWED_SECTIONS = [
-	'apt',
-	'pacman'
-]
-
-"""
-	Will be removed when the installer search system is integrated
-"""
-LINUX_INSTALLER_ASSOC = {
-	'arch': [ 'pacman', [ '-S', '--noconfirm' ] ],
-	'ubuntu': [ 'apt', [ 'install', '-y' ] ]
-}
-
 class ListHandler(ArgumentHandler):
 	def handle(self, args: argparse.Namespace, manifests: list[ManifestContext]):
-		for manifest in manifests:
-			print(manifest.name())
+		print('\n'.join([ manifest.name() for manifest in manifests ]))
 		return HDLR_OK
 
 class InstallHandler(ArgumentHandler):
 	def handle(self, args: argparse.Namespace, manifests: list[ManifestContext]):
-		type = get_linux_type()
-		installer = Installer(LINUX_INSTALLER_ASSOC[type][0], LINUX_INSTALLER_ASSOC[type][1])
-		allowed = [ section for section in ALLOWED_SECTIONS ]
-		for manifest in manifests:
-			for section in manifest.sections():
-				if section not in allowed:
-					warning('Cannot handle \'%s\' section in \'%s\' manifest. Not allowed', section, manifest.name())
-					continue
-				if section != installer.backend():
-					continue
-				installer.install(manifest)
+		installer = Installer(get_linux_type())
+		installer.install(manifests, args.backend)
 		return HDLR_OK
 
 def main(argparser: argparse.ArgumentParser) -> int:
-	args = argparser.parse_args()
-	manifests: list[ManifestContext] = []
+	manifests: list[ManifestContext] = [ ]
 	for elem in os.listdir(MANIFESTS_DIRECTORY):
 		try:
 			with open(f'./{MANIFESTS_DIRECTORY}/{elem}', 'r') as wrapper:
 				manifests.append(ManifestContext(wrapper, elem))
 		except EnvironmentError:
 			warning('Cannot open file \'%s\' for reading', elem)
-			return 1
+			return HDLR_ERR
+
+	args = argparser.parse_args()
 
 	if args.list:
 		ListHandler(argparser, args, manifests)
@@ -69,10 +44,11 @@ def main(argparser: argparse.ArgumentParser) -> int:
 	if args.install:
 		InstallHandler(argparser, args, manifests)
 
-	return 0
+	return HDLR_OK
 
 if __name__ == "__main__":
 	argparser = argparse.ArgumentParser()
 	argparser.add_argument('-l', '--list', default=False, action="store_true", help="list all available manifests")
 	argparser.add_argument('-i', '--install', default=False, action="store_true", help="install all available dependencies for system")
+	argparser.add_argument('-b', '--backend', help="backend that will be used for installation")
 	argparser.exit(main(argparser))

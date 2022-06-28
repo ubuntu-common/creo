@@ -1,7 +1,4 @@
-from asyncore import read
 import csv
-
-from logging import error
 
 def get_linux_type() -> str:
 	with open('/etc/os-release', 'r') as wrapper:

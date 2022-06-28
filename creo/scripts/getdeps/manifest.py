@@ -2,7 +2,7 @@ import io
 import configparser
 
 class ManifestReader:
-	def __init__(self, manifest: io.TextIOWrapper) -> None:
+	def __init__(self, manifest: io.TextIOWrapper):
 		self.__parser = configparser.ConfigParser(allow_no_value=True)
 		self.__parser.read_file(manifest)
 
@@ -13,7 +13,7 @@ class ManifestReader:
 		return list(self.__parser[section])
 
 class ManifestContext(ManifestReader):
-	def __init__(self, manifest: io.TextIOWrapper, name: str) -> None:
+	def __init__(self, manifest: io.TextIOWrapper, name: str):
 		ManifestReader.__init__(self, manifest)
 		self.__name = name
 
