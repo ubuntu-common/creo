@@ -1,5 +1,5 @@
-[pacman]
+[arch-pacman]
 make
 
-[apt]
+[ubuntu-apt]
 make

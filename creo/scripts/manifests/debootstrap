@@ -1,5 +1,5 @@
-[pacman]
+[arch-pacman]
 debootstrap
 
-[apt]
+[ubuntu-apt]
 debootstrap
