@@ -1,9 +1,9 @@
-[ubuntu]
+[apt]
 kconfig-frontends
 
 #
 # The Arch Linux distribution pacman package database does not contain the kconfig-frontends package.
 # Need to implement the install feature from the AUR or manually download and build this package.
 #
-# [arch]
+# [pacman]
 # kconfig-frontends
