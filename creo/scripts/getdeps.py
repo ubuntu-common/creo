@@ -1,40 +1,78 @@
 #!/usr/bin/env python3
 
+from logging import warning
+
+import argparse
 import os
-import sys
-import csv
-import configparser
 
-def parse_config(file) -> dict:
-	with open(file) as desc:
-		reader = csv.reader(desc, delimiter="=")
-		return dict(reader)
+from getdeps.manifest import ManifestContext
+from getdeps.platform import get_linux_type
+from getdeps.handler import ArgumentHandler, HDLR_OK
+from getdeps.installer import Installer
 
-def get_installer(id) -> int:
-	"""Only Ubuntu and Arch Linux support right now!"""
-	if id == 'arch':
-		return 'pacman -S --noconfirm'
-	elif id == 'ubuntu':
-		return 'apt install -y'
+"""
+	This directory is relative to the working directory!
+"""
+MANIFESTS_DIRECTORY = "manifests"
 
-class ManifestInstaller:
-	def __init__(self, manifests_dir = None) -> None:
-		self.__os_id = parse_config('/etc/os-release')['ID']
-		self.__installer = get_installer(self.__os_id)
-		self.__parser = configparser.ConfigParser(allow_no_value=True)
-		if manifests_dir:
-			for mfst in os.listdir(manifests_dir):
-				self.add_manifest(os.path.join(manifests_dir, mfst))
+"""
+	Be careful, the $id$ key will be replaced with your distribution ID during the parsing process!
+"""
+ALLOWED_SECTIONS = [
+	'apt',
+	'pacman'
+]
 
-	def add_manifest(self, file) -> None:
-		self.__parser.read(file)
-		for pkg in self.__parser[self.__os_id]:
-			self.__installer += f' {pkg}'
-		self.__parser.clear()
+"""
+	Will be removed when the installer search system is integrated
+"""
+LINUX_INSTALLER_ASSOC = {
+	'arch': [ 'pacman', [ '-S', '--noconfirm' ] ],
+	'ubuntu': [ 'apt', [ 'install', '-y' ] ]
+}
 
-	def install(self) -> int:
-		return os.system(self.__installer)
+class ListHandler(ArgumentHandler):
+	def handle(self, args: argparse.Namespace, manifests: list[ManifestContext]):
+		for manifest in manifests:
+			print(manifest.name())
+		return HDLR_OK
+
+class InstallHandler(ArgumentHandler):
+	def handle(self, args: argparse.Namespace, manifests: list[ManifestContext]):
+		type = get_linux_type()
+		installer = Installer(LINUX_INSTALLER_ASSOC[type][0], LINUX_INSTALLER_ASSOC[type][1])
+		allowed = [ section for section in ALLOWED_SECTIONS ]
+		for manifest in manifests:
+			for section in manifest.sections():
+				if section not in allowed:
+					warning('Cannot handle \'%s\' section in \'%s\' manifest. Not allowed', section, manifest.name())
+					continue
+				if section != installer.backend():
+					continue
+				installer.install(manifest)
+		return HDLR_OK
+
+def main(argparser: argparse.ArgumentParser) -> int:
+	args = argparser.parse_args()
+	manifests: list[ManifestContext] = []
+	for elem in os.listdir(MANIFESTS_DIRECTORY):
+		try:
+			with open(f'./{MANIFESTS_DIRECTORY}/{elem}', 'r') as wrapper:
+				manifests.append(ManifestContext(wrapper, elem))
+		except EnvironmentError:
+			warning('Cannot open file \'%s\' for reading', elem)
+			return 1
+
+	if args.list:
+		ListHandler(argparser, args, manifests)
+
+	if args.install:
+		InstallHandler(argparser, args, manifests)
+
+	return 0
 
 if __name__ == "__main__":
-	installer = ManifestInstaller(os.path.join(os.path.dirname(__file__), 'manifests'))
-	sys.exit(installer.install())
+	argparser = argparse.ArgumentParser()
+	argparser.add_argument('-l', '--list', default=False, action="store_true", help="list all available manifests")
+	argparser.add_argument('-i', '--install', default=False, action="store_true", help="install all available dependencies for system")
+	argparser.exit(main(argparser))
