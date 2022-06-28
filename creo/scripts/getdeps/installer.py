@@ -8,7 +8,12 @@ from getdeps.manifest import ManifestContext
 BACKEND_RULES = {
 	'arch': {
 		'pacman': [ '-S', '--noconfirm' ],
-		'yay': [ '-S', '--noconfirm' ]
+		'yay': [ '-S', '--noconfirm' ],
+		'paru': [ '-S', '--noconfirm' ],
+		'pikaur': [ '-S', '--noconfirm' ],
+		'trizen': [ '-S', '--noconfirm' ],
+		'aura': [ '-S', '--noconfirm' ],
+		'pamac': [ 'install', '--no-confirm' '--aur' ]
 	},
 	'ubuntu': { 'apt': [ 'install', '-y' ] }
 }
