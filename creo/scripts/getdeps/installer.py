@@ -1,5 +1,3 @@
-from logging import warning
-
 import os
 import subprocess
 
@@ -30,8 +28,7 @@ def get_avaliable_backends(system_id: str) -> list[str]:
 			if os.path.isfile(path_backend) is False:
 				continue
 			if os.access(path_backend, os.X_OK) is False:
-				warning('Supported \'%s\' backend found, but it\'s can\'t be executed. No executable access rights', path_backend)
-				continue
+				raise RuntimeError(f'Supported \'{path_backend}\' backend found, but it\'s can\'t be executed. No executable access rights')
 			avaliable.append(backend)
 	return avaliable
 
@@ -48,8 +45,7 @@ class Installer:
 		targets: dict[str, list[str]] = { }
 		if backend:
 			if backend not in self.__avaliable_backends:
-				warning('Specified backend \'%s\' is unsupported', backend)
-				return
+				raise RuntimeError(f'Specified backend \'{backend}\' is unsupported')
 			avaliable = [ backend ]
 		else:
 			avaliable = self.__avaliable_backends
@@ -58,8 +54,7 @@ class Installer:
 				try:
 					section_id, section_backend = section.split('-')
 				except ValueError:
-					warning('Cannot handle manifest \'%s\'. Unexpected section \'%s\'', manifest.name(), section)
-					continue
+					raise RuntimeError(f'Cannot handle manifest \'{manifest.name()}\'. Unexpected section \'{section}\'')
 				if section_id != self.__system_id:
 					continue
 				if section_backend not in avaliable:
