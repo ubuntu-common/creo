@@ -1,0 +1,5 @@
+[arch-pacman]
+python3
+
+[ubuntu-apt]
+python3

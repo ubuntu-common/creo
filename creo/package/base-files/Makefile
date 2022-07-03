@@ -10,7 +10,7 @@ endef
 $(eval $(call Package/Setup,base-files))
 
 define Package/base-files/prepare
-	debootstrap \
+	$(DEBOOTSTRAP) \
 		--arch=$(CONFIG_ARCH) \
 		--variant=$(CONFIG_VARIANT) \
 		--download-only \
@@ -21,16 +21,16 @@ endef
 
 define Package/base-files/install
 	$(CP) $(TMP_DIR)/* $(STAGING_DIR)
-	debootstrap \
+	$(DEBOOTSTRAP) \
 		--arch=$(CONFIG_ARCH) \
 		--variant=$(CONFIG_VARIANT) \
 		$(CONFIG_SUITE) \
 		$(STAGING_DIR) \
 		$(CONFIG_SOURCE)
-	install -d $(STAGING_DIR)/etc/creo
-	install -d $(STAGING_DIR)/etc/creo/hooks
-	install -m 754 -D ./files/hooks/* $(STAGING_DIR)/etc/creo/hooks
-	install -m 754 -D ./files/setup.sh $(STAGING_DIR)/etc/creo
+	$(INSTALL_DIR) $(STAGING_DIR)/etc/creo
+	$(INSTALL_DIR) $(STAGING_DIR)/etc/creo/hooks
+	$(INSTALL_BIN) ./files/hooks/* $(STAGING_DIR)/etc/creo/hooks
+	$(INSTALL_BIN) ./files/setup.sh $(STAGING_DIR)/etc/creo
 endef
 
 $(eval $(call Package/RegPrepare,base-files,prepare))
