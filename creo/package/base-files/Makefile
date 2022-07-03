@@ -31,6 +31,7 @@ define Package/base-files/install
 	$(INSTALL_DIR) $(STAGING_DIR)/etc/creo/hooks
 	$(INSTALL_BIN) ./files/hooks/* $(STAGING_DIR)/etc/creo/hooks
 	$(INSTALL_BIN) ./files/setup.sh $(STAGING_DIR)/etc/creo
+	$(CHENV) --directory=$(STAGING_DIR) --command=/etc/creo/setup.sh
 endef
 
 $(eval $(call Package/RegPrepare,base-files,prepare))
