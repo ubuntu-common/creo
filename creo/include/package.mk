@@ -3,7 +3,6 @@ include $(TOPDIR)/rules.mk
 define Package/Setup
 	NAME:=$1
 	$(call Package/$1)
-	STAGING_DIR:=$(STAGING_DIR)/$1
 	TMP_DIR:=$(TMP_DIR)/$1
 endef
 
@@ -34,4 +33,15 @@ define Package/RegCleanup
 cleanup:
 	$(call Package/RegValidate,$1,$2,cleanup)
 	$(RM) $(STAGING_DIR)
+endef
+
+define Package/Forward
+$(1)/prepare: $(1)/Makefile
+	$(MAKE) -C $(1) prepare
+
+$(1)/install: $(1)/Makefile
+	$(MAKE) -C $(1) install
+
+$(1)/cleanup: $(1)/Makefile
+	$(MAKE) -C $(1) cleanup
 endef

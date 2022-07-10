@@ -14,5 +14,6 @@ DEBOOTSTRAP:=debootstrap
 
 INSTALL_BIN:=install -m755
 INSTALL_DIR:=install -d -m755
+INSTALL_DATA:=install -m0644
 
 CHENV:=$(PYTHON) $(SCRIPTS_DIR)/chenv.py
