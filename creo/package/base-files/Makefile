@@ -13,6 +13,7 @@ define Package/base-files/prepare
 	$(DEBOOTSTRAP) \
 		--arch=$(CONFIG_ARCH) \
 		--variant=$(CONFIG_VARIANT) \
+		--include=$(CONFIG_INCLUDE) \
 		--download-only \
 		$(CONFIG_SUITE) \
 		$(TMP_DIR) \
@@ -21,17 +22,15 @@ endef
 
 define Package/base-files/install
 	$(CP) $(TMP_DIR)/* $(STAGING_DIR)
+	$(INSTALL_DIR) $(STAGING_DIR)/etc
+	$(INSTALL_DATA) ./files/etc/{hostname,hosts} $(STAGING_DIR)/etc
 	$(DEBOOTSTRAP) \
 		--arch=$(CONFIG_ARCH) \
 		--variant=$(CONFIG_VARIANT) \
+		--include=$(CONFIG_INCLUDE) \
 		$(CONFIG_SUITE) \
 		$(STAGING_DIR) \
 		$(CONFIG_SOURCE)
-	$(INSTALL_DIR) $(STAGING_DIR)/etc/creo
-	$(INSTALL_DIR) $(STAGING_DIR)/etc/creo/hooks
-	$(INSTALL_BIN) ./files/hooks/* $(STAGING_DIR)/etc/creo/hooks
-	$(INSTALL_BIN) ./files/setup.sh $(STAGING_DIR)/etc/creo
-	$(CHENV) --directory=$(STAGING_DIR) --command=/etc/creo/setup.sh
 endef
 
 $(eval $(call Package/RegPrepare,base-files,prepare))

@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# setup the environment to work inside the chroot environment
-export HOME=/root
-export LC_ALL=C

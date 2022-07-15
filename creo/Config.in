@@ -43,3 +43,7 @@ config SUITE
 config SOURCE
 	string "Target source"
 	default "http://us.archive.ubuntu.com/ubuntu/"
+
+config INCLUDE
+	string "Specific packages"
+	default "systemd-sysv"
